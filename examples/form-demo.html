@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>A simple form to Test Promise.Pick</title>
+
+  <link rel="stylesheet" href="css/form-demo.css" />
+</head>
+
+<body>
+  <div class="container">
+    <h3>Enter email or username<br />to test Promise.pick</h3>
+
+    <form id="form">
+      <div class="field">
+        <label>Email</label>
+        <input name="email" />
+      </div>
+
+      <div class="field">
+        <label>Username</label>
+        <input name="username" />
+      </div>
+
+      <div class="field">
+        <label>Captcha</label>
+        <input name="captcha" />
+        <small>For testing, enter <strong>xyz</strong></small>
+      </div>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <pre id="log"></pre>
+  </div>
+
+  <script src="../polyfill/pick.js"></script>
+
+  <script>
+    const log = msg =>
+      document.getElementById("log").textContent += msg + "\n";
+
+    const validateEmail = email =>
+      new Promise((res, rej) =>
+        setTimeout(() => {
+          if (!email) rej(new Error("email required"));
+          else if (!email.includes("@")) rej(new Error("invalid email"));
+          else res({ ok: true, field: "email" });
+        }, 300)
+      );
+
+    const validateUsername = name =>
+      new Promise((res, rej) =>
+        setTimeout(() => {
+          if (!name) rej(new Error("either email or username is required"));
+          else res({ ok: true, field: "username" });
+        }, 400)
+      );
+
+    const validateCaptcha = token =>
+      new Promise((res, rej) =>
+        setTimeout(() => {
+          if (token === "xyz") res(true);
+          else rej(new Error("captcha invalid"));
+        }, 200)
+      );
+
+    document.getElementById("form").onsubmit = async e => {
+      e.preventDefault();
+      log("Submitting form...");
+
+      const form = e.target;
+
+      try {
+        await validateCaptcha(form.captcha.value);
+
+        const result = await Promise.pick(
+          [
+            validateEmail(form.email.value),
+            validateUsername(form.username.value)
+          ],
+          r => r.ok === true
+        );
+
+        log("Form passed via: " + result.field);
+      } catch (err) {
+        log("Form failed: " + err.message);
+      }
+    };
+  </script>
+</body>
+</html>

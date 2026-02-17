@@ -1,6 +1,6 @@
 /**
  * Resolves a promise based on selection.
- * Validates data if picked (selected) values are passed or failed.
+ * Validates data after picked (selected) values are passed or failed.
  */
 Promise.pick = function (iterable, selector) {
   if (typeof selector !== "function") {
